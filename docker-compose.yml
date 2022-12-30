@@ -1,0 +1,7 @@
+version: '3'
+services:
+  consul:
+    image: consul
+    ports:
+      - '18500:8500'
+      - '18600:8600'
