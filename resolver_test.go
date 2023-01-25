@@ -9,12 +9,12 @@ import (
 )
 
 func TestNew_Error_NoConnection(t *testing.T) {
-	_, err := New("foo", WithConsulAddress("bad_address"))
+	_, err := New(strings.Repeat("x", 256), WithConsulAddress("bad_address"))
 	if err == nil {
 		t.Fatal("unexpected no error")
 	}
 
-	if err.Error() != "error connect to consul \"bad_address\", dial tcp: address bad_address: missing port in address" {
+	if err.Error() != "error parse service name, insufficient data for calculated length type" {
 		t.Fatalf("unexpected error message %s", err.Error())
 	}
 }
@@ -26,7 +26,7 @@ func TestTimeout(t *testing.T) {
 	}
 	defer ln.Close()
 
-	r, err := New("foo", WithConsulAddress("127.0.0.1:38600"), WithTimeout(time.Millisecond*100))
+	r, err := New("foo", WithConsulAddress("127.0.0.1:38600"), WithTimeout(time.Millisecond*100), WithMaxRequestAttempts(1))
 	if err != nil {
 		t.Errorf("unexpected error, %v", err)
 		return
@@ -39,7 +39,7 @@ func TestTimeout(t *testing.T) {
 		return
 	}
 
-	if !strings.HasSuffix(errUpdate.Error(), "i/o timeout") {
+	if !strings.HasSuffix(errUpdate.Error(), "error get SRV records, max attempts reached") {
 		t.Errorf("unexpected error message, %v", errUpdate)
 		return
 	}
